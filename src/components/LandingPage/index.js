@@ -9,9 +9,14 @@ import {
     Badge,
     Image,
 } from '@chakra-ui/react';
+import ImageViewer from 'react-simple-image-viewer';
+
 
 const LandingPage = () => {
     const [allCars, setCars] = React.useState();
+    const [images, setImages] = React.useState()
+    const [currentImage, setCurrentImage] = React.useState(0);
+    const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
     React.useEffect(() => {
         getCars();
@@ -21,21 +26,41 @@ const LandingPage = () => {
         getAllCars().then(resp => resp.data)
             .then((res) => {
                 setCars(res)
-
+                setImages(res.images.map((el) => { return el.uri.concat('_27.jpg')}))
             })
     }
 
+    
+    const openImageViewer = React.useCallback((index) => {
+        setCurrentImage(index);
+        setIsViewerOpen(true);
+    }, []);
+
+    const closeImageViewer = () => {
+        setCurrentImage(0);
+        setIsViewerOpen(false);
+    };
+
+
     return (
         <VStack spacing={8}>
+            {isViewerOpen && (
+                <ImageViewer
+                src={ images }
+                currentIndex={ currentImage }
+                onClose={ closeImageViewer }
+                />
+            )}
             <Heading as="h1"
                 size="xl">
                 {allCars && allCars.title}</Heading>
             <Text fontSize="lg" noOfLines={4} px={8}>{allCars && allCars.htmlDescription}</Text>
             <HStack spacing={8} px={8} flexWrap={'wrap'} justifyContent="center" gridGap="20px">
-                {allCars && allCars.images.map((carImg) => {
+                {allCars && allCars.images.map((carImg, i) => {
                     return (
                         <Box 
-                        // key={carImg.uri}
+                            key={i}
+                            onClick={ () => openImageViewer(i) }
                             maxW="sm"
                             borderWidth="1px"
                             borderRadius="lg"
